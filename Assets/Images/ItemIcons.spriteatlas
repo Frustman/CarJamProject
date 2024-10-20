@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ItemIcons
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 1024
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: f082cef18f55e484ab089ae0620ba215, type: 3}
+    - {fileID: 2800000, guid: ecfbb19edeeb94e68bd03315ab56b962, type: 3}
+    - {fileID: 2800000, guid: 8a1703d2cde144e28848566aa97f409f, type: 3}
+    - {fileID: 2800000, guid: 3c12621e7fded44b99c98d51458b6372, type: 3}
+    - {fileID: 2800000, guid: 7524ab7a7f453474dbfc0e05e8b92539, type: 3}
+    - {fileID: 2800000, guid: fc9d7ac77b80e424d9c6d2890f9af52b, type: 3}
+    - {fileID: 2800000, guid: 87ffe403ed1efd9458e0e74d12890012, type: 3}
+    - {fileID: 2800000, guid: 2c6b152263244e940b53e79d232a085e, type: 3}
+    - {fileID: 2800000, guid: bc3c1523df7611d4d98df82a8dd6a74a, type: 3}
+    - {fileID: 2800000, guid: 96df5282e804a6f488e4b55e33dbbef2, type: 3}
+    - {fileID: 2800000, guid: f5b592c8f7ef05841877f70aee73a432, type: 3}
+    - {fileID: 2800000, guid: 686161071ef7775448055f798bea6d70, type: 3}
+    - {fileID: 2800000, guid: 166b89c253b5c5f42823a753d2db9770, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - f082cef18f55e484ab089ae0620ba215: 21300000
+    - 2c6b152263244e940b53e79d232a085e: 21300000
+    - 96df5282e804a6f488e4b55e33dbbef2: 21300000
+    - 166b89c253b5c5f42823a753d2db9770: 21300000
+    - 8a1703d2cde144e28848566aa97f409f: 21300000
+    - 87ffe403ed1efd9458e0e74d12890012: 21300000
+    - bc3c1523df7611d4d98df82a8dd6a74a: 21300000
+    - 686161071ef7775448055f798bea6d70: 21300000
+    - fc9d7ac77b80e424d9c6d2890f9af52b: 21300000
+    - f5b592c8f7ef05841877f70aee73a432: 21300000
+    - 7524ab7a7f453474dbfc0e05e8b92539: 21300000
+    - 3c12621e7fded44b99c98d51458b6372: 21300000
+    - ecfbb19edeeb94e68bd03315ab56b962: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: f082cef18f55e484ab089ae0620ba215, type: 3}
+  - {fileID: 21300000, guid: 2c6b152263244e940b53e79d232a085e, type: 3}
+  - {fileID: 21300000, guid: 96df5282e804a6f488e4b55e33dbbef2, type: 3}
+  - {fileID: 21300000, guid: 166b89c253b5c5f42823a753d2db9770, type: 3}
+  - {fileID: 21300000, guid: 8a1703d2cde144e28848566aa97f409f, type: 3}
+  - {fileID: 21300000, guid: 87ffe403ed1efd9458e0e74d12890012, type: 3}
+  - {fileID: 21300000, guid: bc3c1523df7611d4d98df82a8dd6a74a, type: 3}
+  - {fileID: 21300000, guid: 686161071ef7775448055f798bea6d70, type: 3}
+  - {fileID: 21300000, guid: fc9d7ac77b80e424d9c6d2890f9af52b, type: 3}
+  - {fileID: 21300000, guid: f5b592c8f7ef05841877f70aee73a432, type: 3}
+  - {fileID: 21300000, guid: 7524ab7a7f453474dbfc0e05e8b92539, type: 3}
+  - {fileID: 21300000, guid: 3c12621e7fded44b99c98d51458b6372, type: 3}
+  - {fileID: 21300000, guid: ecfbb19edeeb94e68bd03315ab56b962, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - gift_box
+  - UI_Icon_Gas
+  - UI_Icon_Gem
+  - UI_Icon_scroll
+  - glow_2
+  - UI_Icon_Crown
+  - UI_Icon_Gas_Infinite
+  - UI_Icon_Journal
+  - UI_Icon_Coin
+  - UI_Icon_Hourglass
+  - UI_Icon_Clover_Leaf
+  - panel_1
+  - glow_1
+  m_RenderDataMap: {}
+  m_Tag: ItemIcons
+  m_IsVariant: 0

@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6838db0f20a1dc44388ee1812f709d38, type: 3}
+  m_Name: 94-1
+  m_EditorClassIdentifier: 
+  level: 0
+  difficulty: 0
+  colorCount: 3
+  vehicle2x2Count: 020000000300000001000000
+  vehicle3x2Count: 000000000100000002000000
+  vehicle5x2Count: 000000000000000001000000
+  customerCount: 08000000120000001a000000
+  totalCustomerCount: 52
+  totalVehicleCount: 10
+  availableVehicleSpace: 5
+  leastParkableSpace: 3
+  customerColorLine: 02000000020000000200000002000000000000000200000000000000020000000200000000000000020000000200000000000000020000000200000002000000020000000200000002000000020000000100000001000000020000000200000002000000010000000100000002000000010000000100000001000000010000000100000001000000010000000100000001000000010000000000000000000000000000000000000001000000010000000100000001000000020000000200000002000000020000000200000002000000
+  totalGridCount: 21
+  directionFlipRate: 0.45000002
+  seed: 940000
+  vehicleDatas:
+  - posInGrid: {x: 6, y: 6}
+    direction: 0
+    colorIndex: 1
+    vehicleIndex: 0
+  - posInGrid: {x: 5, y: 6}
+    direction: 3
+    colorIndex: 2
+    vehicleIndex: 1
+  - posInGrid: {x: 6, y: 7}
+    direction: 3
+    colorIndex: 2
+    vehicleIndex: 2
+  - posInGrid: {x: 7, y: 6}
+    direction: 0
+    colorIndex: 1
+    vehicleIndex: 1
+  - posInGrid: {x: 5, y: 5}
+    direction: 0
+    colorIndex: 2
+    vehicleIndex: 0
+  - posInGrid: {x: 6, y: 8}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 0
+  - posInGrid: {x: 7, y: 7}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 0
+  - posInGrid: {x: 8, y: 6}
+    direction: 1
+    colorIndex: 2
+    vehicleIndex: 1
+  - posInGrid: {x: 6, y: 4}
+    direction: 0
+    colorIndex: 1
+    vehicleIndex: 0
+  - posInGrid: {x: 4, y: 5}
+    direction: 3
+    colorIndex: 1
+    vehicleIndex: 0
+  gridSize: {x: 13, y: 13}
+  pickAnswer: 05000000020000000400000009000000070000000300000008000000060000000000000001000000
+  themaSceneName: Thema_City

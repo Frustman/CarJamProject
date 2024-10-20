@@ -1,0 +1,147 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Icons
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 1024
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: b7c4e2fa6896d4e41943d8208d8abc6a, type: 3}
+    - {fileID: 2800000, guid: a398336f90d01ab41a98506d27dbc5bf, type: 3}
+    - {fileID: 2800000, guid: a2e2d4780baf62d4aa4bae6f675f6f95, type: 3}
+    - {fileID: 2800000, guid: 90f19881effd38846b92bbb64669540a, type: 3}
+    - {fileID: 2800000, guid: cd290df35dcb768488d4981a9f56e3a4, type: 3}
+    - {fileID: 2800000, guid: 8b08c0411dfad3440b31c9ccfca96a7e, type: 3}
+    - {fileID: 2800000, guid: 4e1c06b3711e6b84ab3089a2a8d86251, type: 3}
+    - {fileID: 2800000, guid: b2132fc342dc04f459682233dc469d3f, type: 3}
+    - {fileID: 2800000, guid: 427f264d60e344a4cb096b813789aff9, type: 3}
+    - {fileID: 2800000, guid: b9135792ab5dc3d4fb903d34967c0cfa, type: 3}
+    - {fileID: 2800000, guid: 342b484b08205244e82334672a68d0ec, type: 3}
+    - {fileID: 2800000, guid: 61860dade0859bc4382440ca7ec0bc3f, type: 3}
+    - {fileID: 2800000, guid: 379f035139e19ac41aa52075a3ce75fe, type: 3}
+    - {fileID: 2800000, guid: 47df6dfd843da8e428be529b1d6743f6, type: 3}
+    - {fileID: 2800000, guid: 673d41345020b0f4bac1b2371859c539, type: 3}
+    - {fileID: 2800000, guid: bf77a2813dd1c7b44b9c2640ebdb961c, type: 3}
+    - {fileID: 2800000, guid: 67041819e0fde04448b64bc35ab101f3, type: 3}
+    - {fileID: 2800000, guid: 368788cf2d3400c48b95223907a90ff4, type: 3}
+    - {fileID: 2800000, guid: 3dc357d221843d84d8cdce111073dd37, type: 3}
+    - {fileID: 2800000, guid: 2a89a77e10134ac498bc3648da15474c, type: 3}
+    - {fileID: 2800000, guid: ba4734505ff2d4d4c83d174cc9f43c46, type: 3}
+    - {fileID: 2800000, guid: a128365163fb404448e3248cca617bf1, type: 3}
+    - {fileID: 2800000, guid: 98a9f85b18ebaba42b3cd7814ce695eb, type: 3}
+    - {fileID: 2800000, guid: 2d69398cc5d948347b80c0f1e8310886, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - ba4734505ff2d4d4c83d174cc9f43c46: 21300000
+    - 8b08c0411dfad3440b31c9ccfca96a7e: 21300000
+    - 379f035139e19ac41aa52075a3ce75fe: 21300000
+    - a128365163fb404448e3248cca617bf1: 21300000
+    - bf77a2813dd1c7b44b9c2640ebdb961c: 21300000
+    - 90f19881effd38846b92bbb64669540a: 21300000
+    - b9135792ab5dc3d4fb903d34967c0cfa: 21300000
+    - 3dc357d221843d84d8cdce111073dd37: 21300000
+    - 4e1c06b3711e6b84ab3089a2a8d86251: 21300000
+    - b2132fc342dc04f459682233dc469d3f: 21300000
+    - cd290df35dcb768488d4981a9f56e3a4: 21300000
+    - 673d41345020b0f4bac1b2371859c539: 21300000
+    - a2e2d4780baf62d4aa4bae6f675f6f95: 21300000
+    - 67041819e0fde04448b64bc35ab101f3: 21300000
+    - 342b484b08205244e82334672a68d0ec: 21300000
+    - 98a9f85b18ebaba42b3cd7814ce695eb: 21300000
+    - 2d69398cc5d948347b80c0f1e8310886: 21300000
+    - 427f264d60e344a4cb096b813789aff9: 21300000
+    - 61860dade0859bc4382440ca7ec0bc3f: 21300000
+    - 47df6dfd843da8e428be529b1d6743f6: 21300000
+    - 2a89a77e10134ac498bc3648da15474c: 21300000
+    - a398336f90d01ab41a98506d27dbc5bf: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: ba4734505ff2d4d4c83d174cc9f43c46, type: 3}
+  - {fileID: 21300000, guid: 8b08c0411dfad3440b31c9ccfca96a7e, type: 3}
+  - {fileID: 21300000, guid: 379f035139e19ac41aa52075a3ce75fe, type: 3}
+  - {fileID: 21300000, guid: a128365163fb404448e3248cca617bf1, type: 3}
+  - {fileID: 21300000, guid: bf77a2813dd1c7b44b9c2640ebdb961c, type: 3}
+  - {fileID: 21300000, guid: 90f19881effd38846b92bbb64669540a, type: 3}
+  - {fileID: 21300000, guid: b9135792ab5dc3d4fb903d34967c0cfa, type: 3}
+  - {fileID: 21300000, guid: 3dc357d221843d84d8cdce111073dd37, type: 3}
+  - {fileID: 21300000, guid: 4e1c06b3711e6b84ab3089a2a8d86251, type: 3}
+  - {fileID: 21300000, guid: b2132fc342dc04f459682233dc469d3f, type: 3}
+  - {fileID: 21300000, guid: cd290df35dcb768488d4981a9f56e3a4, type: 3}
+  - {fileID: 21300000, guid: 673d41345020b0f4bac1b2371859c539, type: 3}
+  - {fileID: 21300000, guid: a2e2d4780baf62d4aa4bae6f675f6f95, type: 3}
+  - {fileID: 21300000, guid: 67041819e0fde04448b64bc35ab101f3, type: 3}
+  - {fileID: 21300000, guid: 342b484b08205244e82334672a68d0ec, type: 3}
+  - {fileID: 21300000, guid: 98a9f85b18ebaba42b3cd7814ce695eb, type: 3}
+  - {fileID: 21300000, guid: 2d69398cc5d948347b80c0f1e8310886, type: 3}
+  - {fileID: 21300000, guid: 427f264d60e344a4cb096b813789aff9, type: 3}
+  - {fileID: 21300000, guid: 61860dade0859bc4382440ca7ec0bc3f, type: 3}
+  - {fileID: 21300000, guid: 47df6dfd843da8e428be529b1d6743f6, type: 3}
+  - {fileID: 21300000, guid: 2a89a77e10134ac498bc3648da15474c, type: 3}
+  - {fileID: 21300000, guid: a398336f90d01ab41a98506d27dbc5bf, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - undo
+  - Icon_Cup
+  - Icon_Settings
+  - VibrateIcon
+  - Icon_Star
+  - Icon_Charts
+  - Icon_Note
+  - MovieClapper
+  - Icon_Exit
+  - Icon_Home
+  - Icon_Checkmark
+  - Icon_Sound
+  - Icon_Cancel
+  - Icon_User
+  - Icon_Play
+  - blush
+  - smiling_imp
+  - Icon_Info
+  - Icon_Question
+  - Icon_Shop
+  - Ripple
+  - Cursor
+  m_RenderDataMap: {}
+  m_Tag: Icons
+  m_IsVariant: 0
