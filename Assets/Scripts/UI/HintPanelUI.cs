@@ -2,6 +2,7 @@ using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class HintPanelUI : MonoBehaviour
 {
@@ -47,7 +48,7 @@ public class HintPanelUI : MonoBehaviour
                     DOVirtual.Vector3(Vector3.one, Vector3.one * 0.2f, 0.5f, value =>
                     {
                         thinkingAnimator.transform.localScale = value;
-                    }).SetEase(Ease.OutElastic).OnComplete(() =>
+                    }).SetEase(Ease.OutCubic).OnComplete(() =>
                     {
                         gameObject.SetActive(false);
                         GameManager.Instance.canCheckWin = true;
@@ -65,7 +66,7 @@ public class HintPanelUI : MonoBehaviour
                 DOVirtual.Vector3(Vector3.one, Vector3.one * 0.2f, 0.5f, value =>
                 {
                     thinkingAnimator.transform.localScale = value;
-                }).SetEase(Ease.OutElastic).OnComplete(() =>
+                }).SetEase(Ease.OutCubic).OnComplete(() =>
                 {
                     gameObject.SetActive(false);
                     GameManager.Instance.canCheckWin = true;
@@ -89,10 +90,11 @@ public class HintPanelUI : MonoBehaviour
                     DOVirtual.Vector3(Vector3.one, Vector3.one / 8f, 0.5f, value =>
                     {
                         thinkingAnimator.transform.localScale = value;
-                    }).SetEase(Ease.OutElastic).OnComplete(() =>
+                    }).SetEase(Ease.OutCubic).OnComplete(() =>
                     {
-                        gameObject.SetActive(false);
+                        UIManager.Instance.ShowHintGoBackPanel();
                         GameManager.Instance.canCheckWin = true;
+                        gameObject.SetActive(false);
                     });
                 });
             });
@@ -107,10 +109,11 @@ public class HintPanelUI : MonoBehaviour
                 DOVirtual.Vector3(Vector3.one, Vector3.one / 8f, 0.5f, value =>
                 {
                     thinkingAnimator.transform.localScale = value;
-                }).SetEase(Ease.OutElastic).OnComplete(() =>
+                }).SetEase(Ease.OutCubic).OnComplete(() =>
                 {
-                    gameObject.SetActive(false);
+                    UIManager.Instance.ShowHintGoBackPanel();
                     GameManager.Instance.canCheckWin = true;
+                    gameObject.SetActive(false);
                 });
             });
         }

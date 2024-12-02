@@ -200,6 +200,7 @@ public class LevelDataEditor : Editor
                 totalCustomerCount += level.vehicle5x2Count[i] * 10;
 
                 totalVehicleCount += level.vehicle2x2Count[i];
+                totalVehicleCount += level.vehicle3x2Count[i];
                 totalVehicleCount += level.vehicle5x2Count[i];
                 totalGridCount += level.vehicle2x2Count[i] * Vehicle.GetVehicleSizeByIndex(0) + level.vehicle3x2Count[i] * Vehicle.GetVehicleSizeByIndex(1) + level.vehicle5x2Count[i] * Vehicle.GetVehicleSizeByIndex(2);
             }
@@ -207,6 +208,15 @@ public class LevelDataEditor : Editor
             level.totalVehicleCount = totalVehicleCount;
             level.totalGridCount = totalGridCount;
 
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField("Full Space Count", GUILayout.Width(150));
+            GUI.enabled = false;
+            EditorGUILayout.IntField(level.fullSpaceCount, GUILayout.Width(50));
+            GUI.enabled = true;
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -701,9 +711,9 @@ public class LevelDataEditor : Editor
         int[] answer = new int[vehicleDataList.Count];
         for (int i = 0; i < popOrder.Count; i++)
         {
-            answer[i] = vehicleDataList.IndexOf(popOrder[i]);
+            answer[i] = popOrder[i].posInGrid.x * 25 + popOrder[i].posInGrid.y;
         }
-        level.pickAnswer = answer;
+        level.answer = answer;
 
         return GenerateCustomerLineFromPopOrder(popOrder, level);
     }

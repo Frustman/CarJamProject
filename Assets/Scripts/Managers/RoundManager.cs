@@ -2,6 +2,7 @@ using Solver;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 public class RoundManager : MonoBehaviour
@@ -40,7 +41,6 @@ public class RoundManager : MonoBehaviour
     private WaitForSeconds waitFor25milli = new WaitForSeconds(0.25f);
 
 
-
     private void Start()
     {
         Instance = this;
@@ -66,6 +66,11 @@ public class RoundManager : MonoBehaviour
         vehicleSpace.Initialize(level);
     }
 
+    public int GetPoppedVehicleCount()
+    {
+        return levelData.vehicleDatas.Length - fieldVehicles.Count;
+    }
+
     public CurrentLevelData GetCurrentSolverData(Vehicle exclusiveVehicle = null)
     {
         CurrentLevelData currentData = new CurrentLevelData();
@@ -82,6 +87,8 @@ public class RoundManager : MonoBehaviour
             }
         }
 
+
+
         if(exclusiveVehicle != null)
         {
             Vector2Int vehiclePos = exclusiveVehicle.gridPos;
@@ -93,6 +100,38 @@ public class RoundManager : MonoBehaviour
             }
         }
 
+        int[,][] blockedCarList = new int[grid.Length, grid[0].Length][];
+
+        for(int i = 0; i < grid.Length; i++)
+        {
+            for(int j = 0; j < grid[0].Length; j++)
+            {
+                blockedCarList[i, j] = new int[levelData.colorCount];
+            }
+        }
+
+        
+        for (int i = 0; i < fieldVehicles.Count; i++)
+        {
+            Vector2Int dir = Vehicle.GetVehicleDirection(fieldVehicles[i].vehicleDirection);
+            Vector2Int currentCheckPos = fieldVehicles[i].gridPos + dir * fieldVehicles[i].GetVehicleSize();
+            while (CheckBounds(grid, currentCheckPos))
+            {
+                if (grid[currentCheckPos.x][currentCheckPos.y] && directionGrid[currentCheckPos.x][currentCheckPos.y] != fieldVehicles[i].vehicleDirection)
+                {
+                    VehicleData vehicleData = vehicleDatas[vehicleGrid[currentCheckPos.x][currentCheckPos.y]];
+                    Vector2Int subDir = Vehicle.GetVehicleDirection(vehicleData.direction);
+                    Vector2Int newCheckPos = vehicleData.posInGrid + subDir * Vehicle.GetVehicleSizeByIndex(vehicleData.vehicleIndex);
+                    while (CheckBounds(grid, newCheckPos))
+                    {
+                        blockedCarList[newCheckPos.x, newCheckPos.y][fieldVehicles[i].GetVehicleColorIndex()] += (int)Math.Pow(10f, fieldVehicles[i].GetVehicleIndex());
+                        newCheckPos += subDir;
+                    }
+                }
+                blockedCarList[currentCheckPos.x, currentCheckPos.y][fieldVehicles[i].GetVehicleColorIndex()] += (int)Math.Pow(10f, fieldVehicles[i].GetVehicleIndex());
+                currentCheckPos += dir;
+            }
+        }
 
         currentData.remainVehicles = new List<ParkedVehicle>();
 
@@ -105,8 +144,8 @@ public class RoundManager : MonoBehaviour
             vehicleData.posInGrid = fieldVehicles[i].gridPos;
             vehicleData.vehicleIndex = fieldVehicles[i].GetVehicleIndex();
             vehicleData.colorIndex = fieldVehicles[i].GetVehicleColorIndex();
+            vehicleData.blockedVehicleCount = CalculateBlockedVehicleCount(blockedCarList, fieldVehicles[i]);
 
-            //Debug.LogFormat("Field Vehicle {0} : gridPos[{1}], color = {2}", i, vehicleData.posInGrid, vehicleData.colorIndex);
             currentData.remainVehicles.Add(vehicleData);
         }
         TraceManager.Instance.GetCurrentSolverData(currentData); 
@@ -114,6 +153,31 @@ public class RoundManager : MonoBehaviour
 
         return currentData;
     }
+
+    public int[] CalculateBlockedVehicleCount(int[,][] blockedCarCount, Vehicle vehicle)
+    {
+        int colorCount = levelData.colorCount;
+        int[] blockedVehicleCount = new int[levelData.colorCount];
+        for(int i = 0; i < blockedVehicleCount.Length; i++)
+        {
+            blockedVehicleCount[i] = 0;
+        }
+
+        Vector2Int vehiclePos = vehicle.gridPos;
+        Vector2Int vehicleDirection = Vehicle.GetVehicleDirection(vehicle.vehicleDirection);
+        for (int j = 0; j < Vehicle.GetVehicleSizeByIndex(vehicle.GetVehicleIndex()); j++)
+        {
+            for(int i = 0; i < blockedVehicleCount.Length; i++)
+            {
+                blockedVehicleCount[i] += blockedCarCount[vehiclePos.x, vehiclePos.y][i];
+            }
+            vehiclePos += vehicleDirection;
+        }
+
+        return blockedVehicleCount;
+    }
+
+
 
 
     public int GetGridSize(int neededGridCount)
@@ -134,24 +198,6 @@ public class RoundManager : MonoBehaviour
         pickCount++;
     }
 
-    public void ShowAnswerAfterPick()
-    {
-        if(levelData.pickAnswer.Length > pickCount)
-        {
-            Vector2Int position = levelData.vehicleDatas[levelData.pickAnswer[pickCount]].posInGrid;
-
-            pickAnswer.transform.position = transform.position
-                            + Vector3.right * cellSize.x * 1.2f * position.x
-                            + Vector3.forward * cellSize.y * 1.2f * position.y
-                            - Vector3.right * cellSize.x * 0.6f * gridSize.x
-                            - Vector3.forward * cellSize.y * 0.6f * gridSize.y
-                            + Vector3.right * cellSize.x * 0.6f
-                            + Vector3.forward * cellSize.y * 0.6f
-                            + Vector3.up * 1f;
-        }
-    }
-
-
     public void Initialize()
     {
         grid = new bool[gridSize.x][];
@@ -164,19 +210,6 @@ public class RoundManager : MonoBehaviour
         {
             directionGrid[i] = new VehicleDirection[gridSize.y];
         }
-
-
-        Vector2Int position = levelData.vehicleDatas[levelData.pickAnswer[0]].posInGrid;
-
-        pickAnswer.transform.position = transform.position
-                        + Vector3.right * cellSize.x * 1.2f * position.x
-                        + Vector3.forward * cellSize.y * 1.2f * position.y
-                        - Vector3.right * cellSize.x * 0.6f * gridSize.x
-                        - Vector3.forward * cellSize.y * 0.6f * gridSize.y
-                        + Vector3.right * cellSize.x * 0.6f
-                        + Vector3.forward * cellSize.y * 0.6f
-                        + Vector3.up * 1f;
-
         gridCenter = new Vector2Int(gridSize.x / 2, gridSize.y / 2);
 
         fieldVehicles = new List<Vehicle>();

@@ -13,8 +13,7 @@ public class PickVehicle : MonoBehaviour
 
     Ray ray;
     RaycastHit hit;
-    private Vehicle currentVehicle;
-    private bool canPick = true;
+    [SerializeField] private bool canPick = true;
 
 
     public void SetCanPick(bool state)
@@ -27,17 +26,20 @@ public class PickVehicle : MonoBehaviour
     {
         if (canPick)
         {
+
             ray = mainCamera.ScreenPointToRay(position);
 
-            if (Physics.Raycast(ray, out hit, layerMask))
+            if (Physics.Raycast(ray, out hit, 1000f, layerMask))
             {
-                hit.transform.TryGetComponent(out currentVehicle);
+                hit.transform.TryGetComponent(out Vehicle currentVehicle);
+                //Debug.Log(hit.transform.name);
 
                 if (currentVehicle)
                 {
                     currentVehicle.Pick();
                     TraceManager.Instance.RemoveAnswer();
-                    InputManager.Instance.InvokeVibrate(1);
+                    //InputManager.Instance.InvokeVibrate(1);
+                    UIManager.Instance.RefreshHintUI();
                 }
             }
         }

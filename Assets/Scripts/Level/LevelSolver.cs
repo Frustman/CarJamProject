@@ -1,15 +1,11 @@
 using Cysharp.Threading.Tasks;
-using JetBrains.Annotations;
+using DG.Tweening;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -20,6 +16,7 @@ namespace Solver
     public class ParkedVehicle
     {
         public int index;
+        public int[] blockedVehicleCount;
         public Vector2Int posInGrid;
         public VehicleDirection direction;
         public int colorIndex;
@@ -40,6 +37,29 @@ namespace Solver
         {
 
         }
+        public string GenerateKey()
+        {
+
+            ulong hash = 17;
+
+            foreach (var row in vehicleExistGrid)
+            {
+                foreach (var v in row)
+                {
+                    hash = hash * 31 + (v ? 1UL : 0UL);
+                }
+            }
+            foreach (var vehicle in parkedVehicleStates)
+            {
+                hash = hash * 31 + (ulong)(vehicle.Item1 * 100 + vehicle.Item2);
+            }
+
+            hash = hash * 31 + (ulong)currentCustomerIndex;
+            return hash.ToString();
+        }
+
+
+
 
         public void Dispose()
         {
@@ -76,6 +96,11 @@ namespace Solver
                 disposed = true;
             }
         }
+        ~CurrentLevelData()
+        {
+            Dispose(false);
+        }
+
         public CurrentLevelData(CurrentLevelData data)
         {
             vehicleExistGrid = new bool[data.vehicleExistGrid.Length][];
@@ -111,6 +136,7 @@ namespace Solver
 
         public int[] customerLine;
         public int availableSpaceCount;
+        public int[] initialAnswer;
 
         private CancellationTokenSource solveToken = new();
         private int answerDebugPrefabPoolIndex;
@@ -121,14 +147,58 @@ namespace Solver
 
         private Stack<ParkedVehicle> answers;
         private HashSet<string> visitedStates;
-        [SerializeField] private int solveCount;
+        private HashSet<string> answerStates;
 
-        public void Initialize(int[] customerLine, int availableSpaceCount)
+        private int[,] remainPoppableSeatCounts;
+        private int colorCount;
+        [SerializeField] private int solveCount;
+        [SerializeField] private int answerCount;
+
+        private bool isCancelled = false;
+
+        public void InitializeCysharp(int[] customerLine, int availableSpaceCount, int[] answer, int colorCount)
         {
             this.customerLine = customerLine;
             this.availableSpaceCount = availableSpaceCount;
+            this.colorCount = colorCount;
+            visitedStates = new();
+            answerStates = new();
             spawnedAnswersDebug = new();
+            initialAnswer = answer;
+            remainPoppableSeatCounts = new int[colorCount, 3];
+            //GetInitialAnswer();
         }
+
+        public void GetInitialAnswer()
+        {
+            CurrentLevelData data = RoundManager.Instance.GetCurrentSolverData();
+
+            
+            while(data.remainVehicles.Count > 0)
+            {
+                foreach(int vehiclePos in initialAnswer)
+                {
+                    Vector2Int pos = new Vector2Int(vehiclePos / 25, vehiclePos % 25);
+                    foreach(ParkedVehicle vehicle in data.remainVehicles)
+                    {
+                        if (vehicle.posInGrid != pos) continue;
+
+                        UpdateVehicleStates(data, vehicle);
+                        RemoveVehicleFromGrid(data, vehicle);
+                        HandleCustomers(data);
+
+                        data.parkedVehicleStates = data.parkedVehicleStates.OrderBy(item => item.Item1 == -1).ToArray();
+
+                        string stateKey = data.GenerateKey();
+                        answerStates.Add(stateKey);
+                        break;
+                    }
+                }
+            }
+        }
+
+
+
         private void Start()
         {
             answerDebugPrefabPoolIndex = PoolManager.Instance.AssignPoolingObject(answerShowerDebugPrefab);
@@ -182,161 +252,295 @@ namespace Solver
             CancelSolving();
             if (!solveEveryPick && vehicle != null) return true;
 
+
             CurrentLevelData initialData = RoundManager.Instance.GetCurrentSolverData(vehicle);
-            answers = new();
-            visitedStates = new();
-            solveCount = 0;
-            /*
-            Debug.LogFormat("Remain Vehicle Count : {0}", initialData.remainVehicles.Count);
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < initialData.parkedVehicleStates.Length; i++)
+            if (RoundManager.Instance.GetPoppedVehicleCount() == 0)
             {
-                sb.Append(string.Format("Vehicle[{0}] = ({1} / {2})", i, initialData.parkedVehicleStates[i].Item1, initialData.parkedVehicleStates[i].Item2));
-            }
-
-            Debug.LogFormat("Current Customer Index : {0}", initialData.currentCustomerIndex);
-            Debug.LogFormat("Vehicles || {0}", sb.ToString());
-
-            for (int i = 0; i < initialData.vehicleExistGrid.Length; i++)
-            {
-                StringBuilder sb2 = new StringBuilder();
-                for (int j = 0; j < initialData.vehicleExistGrid.Length; j++)
+                Vector2Int pos = new Vector2Int(initialAnswer[0] / 25, initialAnswer[0] % 25);
+                foreach (ParkedVehicle remainVehicle in initialData.remainVehicles)
                 {
-                    sb2.Append((initialData.vehicleExistGrid[i][j] == true) ? "O\t" : "X\t");
-                }
-                Debug.Log(sb2.ToString());
-            }
-            */
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            stopwatch.Start();
-
-            var result = await UniTask.RunOnThreadPool(() =>
-            {
-                return Solve(initialData, 1, solveToken.Token);
-            });
-
-            stopwatch.Stop();
-            Debug.LogFormat("Solve Finished : {0} ms", stopwatch.ElapsedMilliseconds);
-
-            if (solveIndex == TraceManager.Instance.solveIndex)
-            {
-                if (result)
-                {
-                    int count = 1;
-                    if(answers.TryPop(out ParkedVehicle currentPick))
+                    if(remainVehicle.posInGrid == pos)
                     {
                         answerShower = PoolManager.Instance.Get(answerShowerPrefab);
-                        answerShower.transform.position = RoundManager.Instance.GridPosToWorldSpace(currentPick.posInGrid) 
-                                                            + RoundManager.Instance.GetVehicleOffsetFromDirection(currentPick.direction, currentPick.vehicleIndex)
+                        answerShower.transform.position = RoundManager.Instance.GridPosToWorldSpace(remainVehicle.posInGrid)
+                                                            + RoundManager.Instance.GetVehicleOffsetFromDirection(remainVehicle.direction, remainVehicle.vehicleIndex)
                                                             + Vector3.up;
+                        break;
                     }
-                    if (showAnswerDebug)
-                    {
-                        while (answers.TryPop(out ParkedVehicle pickedVehicle))
-                        {
-                            TextMeshPro answer = PoolManager.Instance.Get(answerShowerDebugPrefab).GetComponent<TextMeshPro>();
-                            answer.transform.position = RoundManager.Instance.GridPosToWorldSpace(pickedVehicle.posInGrid) + Vector3.up;
-                            answer.text = count.ToString();
-                            spawnedAnswersDebug.Add(answer);
-                            count++;
-                        }
-                    }
-                    Debug.Log("Can Solve");
                 }
-                else
+            } else
+            {
+                Debug.LogFormat("Start Solve - Visited Node Count : {0}, Answer Node Count : {1}", visitedStates.Count, answerStates.Count);
+                answers = new();
+                solveCount = 0;
+                answerCount = 0;
+
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                stopwatch.Start();
+
+                //solveToken.CancelAfter(3000);
+                var result = await UniTask.RunOnThreadPool(() =>
                 {
-                    Debug.Log("Cannot Solve");
+                    return Solve(initialData, 1, solveToken.Token);
+                });
+
+                stopwatch.Stop();
+                Debug.LogFormat("Solve Finished : {0} ms", stopwatch.ElapsedMilliseconds);
+
+                if (solveIndex == TraceManager.Instance.solveIndex)
+                {
+                    if (result)
+                    {
+                        int count = 1;
+                        if (vehicle == null)
+                        {
+                            if (answers.TryPop(out ParkedVehicle currentPick))
+                            {
+                                answerShower = PoolManager.Instance.Get(answerShowerPrefab);
+                                answerShower.transform.position = RoundManager.Instance.GridPosToWorldSpace(currentPick.posInGrid)
+                                                                    + RoundManager.Instance.GetVehicleOffsetFromDirection(currentPick.direction, currentPick.vehicleIndex)
+                                                                    + Vector3.up;
+                            }
+                            if (showAnswerDebug)
+                            {
+                                while (answers.TryPop(out ParkedVehicle pickedVehicle))
+                                {
+                                    TextMeshPro answer = PoolManager.Instance.Get(answerShowerDebugPrefab).GetComponent<TextMeshPro>();
+                                    answer.transform.position = RoundManager.Instance.GridPosToWorldSpace(pickedVehicle.posInGrid) + Vector3.up;
+                                    answer.text = count.ToString();
+                                    spawnedAnswersDebug.Add(answer);
+                                    count++;
+                                }
+                            }
+                        }
+                        Debug.Log("Can Solve");
+                    }
+                    else
+                    {
+                        Debug.Log("Cannot Solve");
+                    }
+                    return result;
+
                 }
-                return result;
             }
             return true;
         }
+
+        List<int> colorOrder = new();
+        List<(int, int)> zeroColors = new();
 
         public bool Solve(CurrentLevelData currentData, int iteration, CancellationToken token)
         {
             if (detailDebugMode)
                 Debug.LogFormat("Solve Start, Iteration : {0}, remainVehicle : {1}", iteration, currentData.remainVehicles.Count);
-
-            if (IsDefeat(currentData))
-            {
-                if (debugMode)
-                    Debug.LogFormat("Defeat called!, Iteration : {0}", iteration);
-                return false;
-            }
-
             if (currentData.remainVehicles.Count <= 1 || currentData.currentCustomerIndex >= customerLine.Length)
             {
                 if (debugMode)
                     Debug.LogFormat("There Is No Remain Vehicle : True!!, Iteration : {0}", iteration);
+                answerCount++;
                 return true;
             }
+
             solveCount++;
-            ParkedVehicle[] orderedVehicles = currentData.remainVehicles
-                .OrderBy(v => v.colorIndex != customerLine[currentData.currentCustomerIndex])
-                .ToArray();
 
-            foreach (var vehicle in orderedVehicles)
+            zeroColors.Clear();
+
+            var poppables = currentData.remainVehicles.Where(v => IsPoppable(currentData, v));
+            for (int i = 0; i < colorCount; i++)
             {
-                if (IsPoppable(currentData, vehicle))
-                {
-                    if (token.IsCancellationRequested) return false;
-
-                    using (CurrentLevelData data = new CurrentLevelData(currentData))
-                    {
-                        if (!UpdateVehicleStates(data, vehicle)) return false;
-
-                        RemoveVehicleFromGrid(data, vehicle);
-
-                        if (!HandleCustomers(data)) return true;
-
-                        data.parkedVehicleStates = data.parkedVehicleStates.OrderBy(item => item.Item1 == -1).ToArray();
-
-                        string stateKey = GenerateStateKey(data);
-                        if (visitedStates.Contains(stateKey)) continue;
-                        visitedStates.Add(stateKey);
-
-                        if (detailDebugMode)
-                        {
-                            LogDebugInfo(iteration, vehicle, currentData, data);
-                        }
-
-                        if (IsDefeat(data))
-                        {
-                            if (debugMode)
-                                Debug.LogFormat("Defeat called!, Iteration : {0}", iteration);
-                            return false;
-                        }
-                        if (Solve(data, iteration + 1, token))
-                        {
-                            answers.Push(vehicle);
-                            if (debugMode)
-                                Debug.LogFormat("Solve Called : {0} | customer Index : {1} | remainVehicleCount : {2} | Picked Vehicle : {3}",
-                                                iteration, data.currentCustomerIndex, data.remainVehicles.Count, vehicle.index);
-                            return true;
-                        }
-                        else
-                        {
-                            if (debugMode)
-                                Debug.LogFormat("BackTrack Called : {0} | customer Index : {1} | remainVehicleCount : {2} | Picked Vehicle : {3}",
-                                                iteration, data.currentCustomerIndex, data.remainVehicles.Count, vehicle.index);
-                            continue;
-                        }
-                    }
-                }
-                else
-                {
-                    if (debugMode)
-                        Debug.LogFormat("Cannot Pop Vehicle : {0} | Vehicle Index : {1}", iteration, vehicle.index);
-                }
+                for (int j = 0; j < 3; j++)
+                    remainPoppableSeatCounts[i, j] = 0;
             }
 
+
+            foreach(var vehicle in poppables)
+            {
+                remainPoppableSeatCounts[vehicle.colorIndex, vehicle.vehicleIndex]++;
+            }
+            for(int i = 0; i < colorCount; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                    if (remainPoppableSeatCounts[i, j] == 0) zeroColors.Add((i, j));
+            }
+            
+
+            colorOrder.Clear();
+            //for (int i = currentData.currentCustomerIndex; i < Math.Min(currentData.currentCustomerIndex + 17, customerLine.Length); i++)
+            int counter = currentData.currentCustomerIndex;
+            int firstColorCount = 1;
+            while(counter < customerLine.Length)
+            {
+                int color = customerLine[counter];
+                if(colorOrder.Count > 0 && color == colorOrder[0])
+                {
+                    counter++;
+                    firstColorCount++;
+                    continue;
+                }
+                if (!colorOrder.Contains(color))
+                {
+                    if (colorOrder.Count == Math.Max(availableSpaceCount, 3)) break;
+                    colorOrder.Add(color);
+                }
+                counter++;
+            }
+
+            Func<ParkedVehicle, (int, int)> keySelector;
+            switch (firstColorCount)
+            {
+                case 4:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && v.vehicleIndex == 0) ? 0 : 1);
+                    };
+                    break;
+                case 6:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && v.vehicleIndex == 1) ? 0 : 1);
+                    };
+                    break;
+                case 8:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && v.vehicleIndex == 0) ? 0 : 1);
+                    };
+                    break;
+                case 12:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && (v.vehicleIndex == 0 || v.vehicleIndex == 1)) ? 0 : 1);
+                    };
+                    break;
+                case 14:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && (v.vehicleIndex == 0 || v.vehicleIndex == 2)) ? 0 : 1);
+                    };
+                    break;
+                case 16:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && (v.vehicleIndex == 1 || v.vehicleIndex == 2)) ? 0 : 1);
+                    };
+                    break;
+                case 18:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), (v.colorIndex == colorOrder[0] && (v.vehicleIndex == 1 || v.vehicleIndex == 2)) ? 0 : 1);
+                    };
+                    break;
+                default:
+                    keySelector = v =>
+                    {
+                        int order = colorOrder.IndexOf(v.colorIndex);
+                        return ((order != -1 ? order : int.MaxValue), 0);
+                    };
+                    break;
+            }
+
+
+            Func<ParkedVehicle, int> colorSelector;
+
+            colorSelector = v =>
+            {
+                int index = 0;
+                for (int i = 0; i < v.blockedVehicleCount.Length; i++)
+                {
+                    index += v.blockedVehicleCount[i] % 10 + (v.blockedVehicleCount[i] / 10) + (v.blockedVehicleCount[i] / 100);
+                }
+                if (zeroColors.Count != 0)
+                {
+                    index = zeroColors.Contains((v.colorIndex, v.vehicleIndex)) ? int.MaxValue : index;
+                }
+                return index;
+            };
+
+            var orderedVehicles = poppables
+                .OrderBy(keySelector)
+                .ThenByDescending(colorSelector)
+                .ToArray();
+
+            /*var orderedVehicles = currentData.remainVehicles
+                .OrderBy(v => v.colorIndex != customerLine[currentData.currentCustomerIndex])
+                .ThenByDescending(v => v.blockedVehicleCount)
+                .ToArray();*/
+            foreach (var vehicle in orderedVehicles)
+            {
+                if (token.IsCancellationRequested) return false;
+
+                using (CurrentLevelData data = new CurrentLevelData(currentData))
+                {
+                    UpdateVehicleStates(data, vehicle);
+
+                    RemoveVehicleFromGrid(data, vehicle);
+
+                    HandleCustomers(data);
+
+                    data.parkedVehicleStates = data.parkedVehicleStates.OrderBy(item => item.Item1 == -1).ToArray();
+
+
+                    string stateKey = data.GenerateKey();
+                    if (answerStates.Contains(stateKey))
+                    {
+                        answers.Push(vehicle);
+                        return true;
+                    }
+
+                    if (visitedStates.Contains(stateKey))
+                    {
+                        if (debugMode)
+                            Debug.LogFormat("Already Visited State!, Iteration : {0}", iteration);
+                        continue;
+                    }
+
+
+                    if (detailDebugMode)
+                    {
+                        LogDebugInfo(iteration, vehicle, currentData, data);
+                    }
+
+                    if (IsDefeat(data))
+                    {
+                        if (token.IsCancellationRequested) return false;
+                        visitedStates.Add(stateKey);
+                        if (debugMode)
+                            Debug.LogFormat("Defeat called!, Iteration : {0}", iteration);
+                        continue;
+                    }
+                    if (Solve(data, iteration + 1, token))
+                    {
+                        if (token.IsCancellationRequested) return false;
+                        answers.Push(vehicle);
+                        answerStates.Add(stateKey);
+                        if (debugMode)
+                            Debug.LogFormat("Solve Called : {0} | customer Index : {1} | remainVehicleCount : {2} | Picked Vehicle : {3}",
+                                            iteration, data.currentCustomerIndex, data.remainVehicles.Count, vehicle.index);
+                        return true;
+                    }
+                    else
+                    {
+                        if (token.IsCancellationRequested) return false;
+                        visitedStates.Add(stateKey);
+                        if (debugMode)
+                            Debug.LogFormat("BackTrack Called : {0} | customer Index : {1} | remainVehicleCount : {2} | Picked Vehicle : {3}",
+                                            iteration, data.currentCustomerIndex, data.remainVehicles.Count, vehicle.index);
+                    }
+                }
+            }
             return false;
         }
 
         private bool UpdateVehicleStates(CurrentLevelData data, ParkedVehicle vehicle)
         {
-            if (vehicle.colorIndex == -1) Debug.Log("Color Error");
             for (int j = 0; j < data.parkedVehicleStates.Length; j++)
             {
                 if (data.parkedVehicleStates[j].Item1 == -1)
@@ -346,7 +550,6 @@ namespace Solver
                     return true;
                 }
             }
-            Debug.Log("There is no place to park");
             return false;
         }
 
@@ -398,6 +601,42 @@ namespace Solver
             return true;
         }
 
+        private bool IsDefeat(CurrentLevelData data)
+        {
+            int count = 0;
+            for (int i = 0; i < data.parkedVehicleStates.Length; i++)
+            {
+                if (data.parkedVehicleStates[i].Item1 != -1) count++;
+            }
+            if (count >= availableSpaceCount) return true;
+            return false;
+        }
+
+
+        private bool IsPoppable(CurrentLevelData data, ParkedVehicle vehicle)
+        {
+            Vector2Int dir = Vehicle.GetVehicleDirection(vehicle.direction);
+            Vector2Int currentCheckPos = vehicle.posInGrid + dir * Vehicle.GetVehicleSizeByIndex(vehicle.vehicleIndex);
+            while (CheckBounds((data.vehicleExistGrid.Length, data.vehicleExistGrid[0].Length), currentCheckPos))
+            {
+                if (data.vehicleExistGrid[currentCheckPos.x][currentCheckPos.y] == true)
+                {
+                    return false;
+                }
+                currentCheckPos += dir;
+            }
+            return true;
+        }
+
+
+        private bool CheckBounds((int, int) gridSize, Vector2Int position)
+        {
+            if (position.x < 0 || position.x >= gridSize.Item1 || position.y < 0 || position.y >= gridSize.Item2)
+                return false;
+            return true;
+        }
+
+
         private void LogDebugInfo(int iteration, ParkedVehicle vehicle, CurrentLevelData currentData, CurrentLevelData data)
         {
             Debug.LogFormat("-------------------Solve Finished Iter {0} --------------------", iteration);
@@ -431,57 +670,9 @@ namespace Solver
             else return "Green";
         }
 
-        private string GenerateStateKey(CurrentLevelData data)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (var state in data.parkedVehicleStates)
-            {
-                sb.Append(state.Item1).Append(",").Append(state.Item2).Append("|");
-            }
-
-            foreach (var vehicle in data.remainVehicles)
-            {
-                sb.Append(vehicle.index).Append(",");
-            }
-
-            return sb.ToString();
-        }
-
-        private bool IsDefeat(CurrentLevelData data)
-        {
-            int count = 0;
-            for(int i = 0; i < data.parkedVehicleStates.Length; i++)
-            {
-                if (data.parkedVehicleStates[i].Item1 != -1) count++;
-            }
-            if (count >= availableSpaceCount) return true;
-            return false;
-        }
 
 
-        private bool IsPoppable(CurrentLevelData data, ParkedVehicle vehicle)
-        {
-            Vector2Int dir = Vehicle.GetVehicleDirection(vehicle.direction);
-            Vector2Int currentCheckPos = vehicle.posInGrid + dir * Vehicle.GetVehicleSizeByIndex(vehicle.vehicleIndex);
-            while (CheckBounds((data.vehicleExistGrid.Length, data.vehicleExistGrid[0].Length), currentCheckPos))
-            {
-                if (data.vehicleExistGrid[currentCheckPos.x][currentCheckPos.y] == true)
-                {
-                    return false;
-                }
-                currentCheckPos += dir;
-            }
-            return true;
-        }
 
-
-        private bool CheckBounds((int, int) gridSize, Vector2Int position)
-        {
-            if (position.x < 0 || position.x >= gridSize.Item1 || position.y < 0 || position.y >= gridSize.Item2)
-                return false;
-            return true;
-        }
 
     }
 }

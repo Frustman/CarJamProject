@@ -1,12 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 public class FrameRateManager : MonoBehaviour
 {
     public static FrameRateManager Instance;
 
+    public string input;
     private float elapsedSlowDownTime;
     private bool hasSlowDownOccured;
 
@@ -18,7 +24,7 @@ public class FrameRateManager : MonoBehaviour
     private void Start()
     {
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 30;
         OnDemandRendering.renderFrameInterval = 1;
 
         elapsedSlowDownTime = 0;
@@ -37,6 +43,16 @@ public class FrameRateManager : MonoBehaviour
             OnDemandRendering.renderFrameInterval = 1;
         }
     }
+
+    [ContextMenu("Check")]
+    public void Check()
+    {
+
+    }
+
+
+
+    /*
     private void Update()
     {
         elapsedSlowDownTime += Time.deltaTime;
@@ -44,7 +60,10 @@ public class FrameRateManager : MonoBehaviour
         if (!hasSlowDownOccured && elapsedSlowDownTime > 10f)
         {
             hasSlowDownOccured = true;
-            SetRenderingFullFps(false);
+            SetRenderingFullFps(false);0
         }
-    }
+    }*/
+
+
+
 }

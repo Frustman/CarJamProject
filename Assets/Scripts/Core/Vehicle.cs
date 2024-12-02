@@ -58,6 +58,10 @@ public class Vehicle : MonoBehaviour
 
     public void OnDisable()
     {
+        goForwardTweener.Kill();
+        moveTween.Kill(false);
+        moveTween = null;
+        goForwardTweener = null;
         spawnDustToken.Cancel();
     }
 
@@ -162,31 +166,21 @@ public class Vehicle : MonoBehaviour
         return -1;
     }
 
-    public void AbsolutePick()
-    {
-        if (!isPicked && GameManager.Instance.isGameRunning)
-        {
-            vehicleSpace.Park(this);
-            isPicked = true;
-            arrowCanvas.SetActive(false);
-            seatsRenderer.SetActive(true);
-            vehicleRenderer.transform.localRotation = Quaternion.identity;
-            vehicleSpace.movingCarCount++;
-            GoForward(1f);
-        }
-    }
-
+    Tweener goForwardTweener;
     public void GoForward(float speedMultiplier)
     {
-        TraceManager.Instance.canUndo = false;
+        TraceManager.Instance.SetUndoImpossible();
         vehicleSpeed = initialSpeed * speedMultiplier;
-        DOVirtual.Vector3(transform.position, transform.position - vehicleRenderer.transform.right * 50f, 50f / vehicleSpeed, value =>
+        goForwardTweener = DOVirtual.Vector3(transform.position, transform.position - vehicleRenderer.transform.right * 50f, 50f / vehicleSpeed, value =>
         {
             if (target == null)
             {
                 transform.position = value;
             }
-        }).SetEase(Ease.Linear);
+        }).SetEase(Ease.Linear).OnComplete(() =>
+        {
+            goForwardTweener = null;
+        });
         SetParticleState(true);
     }
 
@@ -195,7 +189,7 @@ public class Vehicle : MonoBehaviour
     {
         if (!isPicked && GameManager.Instance.isGameRunning)
         {
-            TraceManager.Instance.canUndo = false;
+            TraceManager.Instance.SetUndoImpossible();
             FrameRateManager.Instance.SetRenderingFullFps(true);
             if (!RoundManager.Instance.CanPopFromField(this, out vehicleExistPos))
             {
@@ -216,7 +210,6 @@ public class Vehicle : MonoBehaviour
 
             GoForward(1f);
 
-            RoundManager.Instance.ShowAnswerAfterPick();
         }
     }
 
@@ -243,11 +236,6 @@ public class Vehicle : MonoBehaviour
         });
     }
 
-    private void CannotPopFeedbackAnimation(VehicleDirection hitVehicleDirection)
-    {
-        Vector2Int feedbackDirection = GetVehicleDirection(hitVehicleDirection);
-
-    }
 
     private async UniTask CannotMoveAnimation()
     {
@@ -266,7 +254,7 @@ public class Vehicle : MonoBehaviour
     {
         if(targetPriority < priority)
         {
-            TraceManager.Instance.canUndo = false;
+            TraceManager.Instance.SetUndoImpossible();
             moveTween.Kill(false);
             rotateTween.Kill(false);
 
@@ -275,7 +263,7 @@ public class Vehicle : MonoBehaviour
 
             moveTween = transform.DOMove(target.position, Vector3.Distance(transform.position, target.position) / vehicleSpeed).SetEase(Ease.Linear).OnComplete(callback).OnUpdate(() =>
             {
-                TraceManager.Instance.canUndo = false;
+                TraceManager.Instance.SetUndoImpossible();
             });
             rotateTween = transform.DORotate((Quaternion.Euler(new Vector3(0, 90f, 0)) * Quaternion.LookRotation(target.position - transform.position)).eulerAngles, 0.1f).SetEase(Ease.OutCubic);
         }
@@ -317,6 +305,9 @@ public class Vehicle : MonoBehaviour
         if (state)
         {
             isMoving = true;
+            spawnDustToken.Cancel();
+            spawnDustToken.Dispose();
+            spawnDustToken = new CancellationTokenSource();
             spawnDustTask = SpawnDust(spawnDustToken.Token);
         } else
         {

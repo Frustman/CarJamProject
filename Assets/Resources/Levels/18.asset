@@ -1,0 +1,263 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6838db0f20a1dc44388ee1812f709d38, type: 3}
+  m_Name: 18
+  m_EditorClassIdentifier: 
+  level: 18
+  difficulty: 1
+  colorCount: 6
+  vehicle2x2Count: 030000000300000004000000060000000300000005000000
+  vehicle3x2Count: 050000000200000004000000030000000200000004000000
+  vehicle5x2Count: 020000000200000002000000010000000400000002000000
+  customerCount: 3e0000002c0000003c000000340000004000000040000000
+  totalCustomerCount: 346
+  totalVehicleCount: 57
+  availableVehicleSpace: 3
+  leastParkableSpace: 3
+  customerColorLine: 01000000040000000100000004000000000000000100000000000000040000000400000004000000040000000400000000000000000000000400000004000000010000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000030000000200000002000000020000000300000003000000030000000000000000000000000000000100000004000000000000000100000001000000010000000000000004000000040000000100000001000000010000000100000001000000040000000100000000000000000000000200000000000000020000000200000002000000000000000000000002000000020000000400000000000000040000000000000004000000040000000400000000000000000000000400000005000000010000000100000005000000010000000500000001000000010000000500000001000000050000000100000001000000010000000100000001000000010000000500000001000000050000000100000001000000010000000500000005000000030000000500000003000000030000000500000003000000030000000300000003000000050000000300000002000000010000000200000002000000020000000200000002000000010000000100000001000000000000000400000002000000020000000200000002000000040000000200000000000000040000000000000002000000020000000200000002000000000000000200000004000000040000000500000004000000050000000400000005000000040000000500000004000000040000000400000004000000050000000400000005000000040000000500000005000000050000000500000005000000050000000500000005000000050000000500000003000000020000000200000002000000030000000500000003000000050000000200000005000000030000000500000005000000030000000500000005000000030000000500000005000000050000000500000003000000030000000300000003000000030000000500000005000000050000000500000005000000050000000300000003000000050000000300000005000000050000000100000001000000000000000000000000000000000000000000000000000000010000000000000001000000000000000000000000000000040000000400000004000000040000000400000002000000020000000400000004000000020000000200000002000000040000000400000002000000040000000200000002000000020000000200000002000000020000000200000002000000020000000200000002000000020000000200000002000000020000000200000003000000020000000300000002000000030000000300000003000000030000000300000003000000020000000300000003000000020000000500000000000000050000000500000004000000040000000400000004000000050000000500000004000000000000000400000000000000040000000500000005000000000000000000000004000000000000000500000004000000040000000500000005000000030000000300000000000000030000000000000003000000030000000000000003000000000000000300000000000000030000000300000000000000030000000200000001000000010000000400000001000000040000000100000001000000020000000200000004000000020000000100000004000000030000000400000003000000030000000400000003000000030000000400000004000000040000000300000004000000050000000500000005000000050000000500000005000000
+  totalGridCount: 127
+  fullSpaceCount: 10
+  directionFlipRate: 0.6
+  seed: 180001
+  vehicleDatas:
+  - posInGrid: {x: 11, y: 11}
+    direction: 1
+    colorIndex: 4
+    vehicleIndex: 1
+  - posInGrid: {x: 10, y: 11}
+    direction: 3
+    colorIndex: 1
+    vehicleIndex: 1
+  - posInGrid: {x: 11, y: 12}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 1
+  - posInGrid: {x: 11, y: 10}
+    direction: 1
+    colorIndex: 5
+    vehicleIndex: 1
+  - posInGrid: {x: 10, y: 10}
+    direction: 0
+    colorIndex: 2
+    vehicleIndex: 2
+  - posInGrid: {x: 10, y: 12}
+    direction: 3
+    colorIndex: 2
+    vehicleIndex: 1
+  - posInGrid: {x: 11, y: 13}
+    direction: 3
+    colorIndex: 3
+    vehicleIndex: 2
+  - posInGrid: {x: 13, y: 11}
+    direction: 0
+    colorIndex: 3
+    vehicleIndex: 1
+  - posInGrid: {x: 11, y: 9}
+    direction: 0
+    colorIndex: 5
+    vehicleIndex: 2
+  - posInGrid: {x: 9, y: 10}
+    direction: 0
+    colorIndex: 3
+    vehicleIndex: 0
+  - posInGrid: {x: 8, y: 11}
+    direction: 0
+    colorIndex: 5
+    vehicleIndex: 2
+  - posInGrid: {x: 11, y: 14}
+    direction: 1
+    colorIndex: 2
+    vehicleIndex: 0
+  - posInGrid: {x: 12, y: 13}
+    direction: 1
+    colorIndex: 5
+    vehicleIndex: 1
+  - posInGrid: {x: 13, y: 12}
+    direction: 1
+    colorIndex: 4
+    vehicleIndex: 2
+  - posInGrid: {x: 14, y: 11}
+    direction: 1
+    colorIndex: 4
+    vehicleIndex: 2
+  - posInGrid: {x: 12, y: 9}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 1
+  - posInGrid: {x: 7, y: 11}
+    direction: 3
+    colorIndex: 4
+    vehicleIndex: 0
+  - posInGrid: {x: 8, y: 12}
+    direction: 3
+    colorIndex: 2
+    vehicleIndex: 2
+  - posInGrid: {x: 10, y: 14}
+    direction: 3
+    colorIndex: 1
+    vehicleIndex: 0
+  - posInGrid: {x: 11, y: 15}
+    direction: 3
+    colorIndex: 5
+    vehicleIndex: 1
+  - posInGrid: {x: 14, y: 10}
+    direction: 1
+    colorIndex: 3
+    vehicleIndex: 1
+  - posInGrid: {x: 12, y: 8}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 2
+  - posInGrid: {x: 10, y: 7}
+    direction: 3
+    colorIndex: 0
+    vehicleIndex: 0
+  - posInGrid: {x: 9, y: 8}
+    direction: 3
+    colorIndex: 4
+    vehicleIndex: 2
+  - posInGrid: {x: 7, y: 10}
+    direction: 0
+    colorIndex: 5
+    vehicleIndex: 1
+  - posInGrid: {x: 8, y: 13}
+    direction: 3
+    colorIndex: 0
+    vehicleIndex: 0
+  - posInGrid: {x: 11, y: 16}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 0
+  - posInGrid: {x: 12, y: 15}
+    direction: 1
+    colorIndex: 4
+    vehicleIndex: 2
+  - posInGrid: {x: 13, y: 14}
+    direction: 1
+    colorIndex: 2
+    vehicleIndex: 1
+  - posInGrid: {x: 14, y: 13}
+    direction: 1
+    colorIndex: 4
+    vehicleIndex: 1
+  - posInGrid: {x: 14, y: 9}
+    direction: 1
+    colorIndex: 3
+    vehicleIndex: 0
+  - posInGrid: {x: 12, y: 7}
+    direction: 1
+    colorIndex: 2
+    vehicleIndex: 0
+  - posInGrid: {x: 11, y: 6}
+    direction: 1
+    colorIndex: 2
+    vehicleIndex: 0
+  - posInGrid: {x: 10, y: 6}
+    direction: 3
+    colorIndex: 2
+    vehicleIndex: 0
+  - posInGrid: {x: 6, y: 10}
+    direction: 0
+    colorIndex: 0
+    vehicleIndex: 1
+  - posInGrid: {x: 5, y: 11}
+    direction: 3
+    colorIndex: 4
+    vehicleIndex: 0
+  - posInGrid: {x: 8, y: 14}
+    direction: 3
+    colorIndex: 1
+    vehicleIndex: 1
+  - posInGrid: {x: 9, y: 15}
+    direction: 3
+    colorIndex: 4
+    vehicleIndex: 0
+  - posInGrid: {x: 10, y: 16}
+    direction: 3
+    colorIndex: 1
+    vehicleIndex: 2
+  - posInGrid: {x: 11, y: 17}
+    direction: 3
+    colorIndex: 2
+    vehicleIndex: 1
+  - posInGrid: {x: 16, y: 12}
+    direction: 1
+    colorIndex: 3
+    vehicleIndex: 1
+  - posInGrid: {x: 17, y: 11}
+    direction: 1
+    colorIndex: 2
+    vehicleIndex: 1
+  - posInGrid: {x: 16, y: 10}
+    direction: 0
+    colorIndex: 1
+    vehicleIndex: 0
+  - posInGrid: {x: 11, y: 5}
+    direction: 0
+    colorIndex: 1
+    vehicleIndex: 2
+  - posInGrid: {x: 10, y: 5}
+    direction: 3
+    colorIndex: 5
+    vehicleIndex: 0
+  - posInGrid: {x: 8, y: 7}
+    direction: 3
+    colorIndex: 1
+    vehicleIndex: 0
+  - posInGrid: {x: 5, y: 10}
+    direction: 0
+    colorIndex: 3
+    vehicleIndex: 0
+  - posInGrid: {x: 5, y: 12}
+    direction: 3
+    colorIndex: 0
+    vehicleIndex: 1
+  - posInGrid: {x: 6, y: 13}
+    direction: 3
+    colorIndex: 0
+    vehicleIndex: 1
+  - posInGrid: {x: 11, y: 18}
+    direction: 3
+    colorIndex: 3
+    vehicleIndex: 0
+  - posInGrid: {x: 12, y: 17}
+    direction: 1
+    colorIndex: 5
+    vehicleIndex: 0
+  - posInGrid: {x: 13, y: 16}
+    direction: 1
+    colorIndex: 3
+    vehicleIndex: 0
+  - posInGrid: {x: 15, y: 14}
+    direction: 1
+    colorIndex: 3
+    vehicleIndex: 0
+  - posInGrid: {x: 16, y: 13}
+    direction: 1
+    colorIndex: 0
+    vehicleIndex: 2
+  - posInGrid: {x: 17, y: 10}
+    direction: 0
+    colorIndex: 5
+    vehicleIndex: 0
+  - posInGrid: {x: 15, y: 8}
+    direction: 1
+    colorIndex: 5
+    vehicleIndex: 0
+  - posInGrid: {x: 14, y: 7}
+    direction: 1
+    colorIndex: 5
+    vehicleIndex: 0
+  gridSize: {x: 23, y: 23}
+  answer: cf0000003b010000a3000000890000009d0100000001000055010000a0000000f00000001801000001010000240100006b010000d5000000b3010000d60000000a010000ff000000870000003d01000025010000b4010000080100008800000023010000d400000039010000e9000000b900000065010000190100007f0100008501000022010000200100001c010000340100009a01000069010000060100005301000004010000210100009c01000067010000d30000003501000051010000eb0000001f01000068010000ba0000000501000033010000500100001e0100001d010000
+  pickAnswer: 
+  themaSceneName: Thema_City

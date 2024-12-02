@@ -8,14 +8,14 @@ public class AdManager : MonoBehaviour
     public static AdManager Instance;
     [Header("Prefab Settings")]
 #if UNITY_ANDROID
-    string adUnitId = "----";
+    string adUnitId = "10858b3e2d7b4be1";
 #else
-    string adUnitId = "----";
+    string adUnitId = "40ba0d7aa082898c";
 #endif
 
     int retryAttempt;
 
-    public int rewardType = 0;
+    public int rewardType = 0; // 0 - Get Gold, 1 - Retry, 2 - undo * 10, 3 - heart
 
     public void InitializeRewardedAds()
     {
@@ -111,8 +111,7 @@ public class AdManager : MonoBehaviour
             GameManager.Instance.RestartGame();
         } else if(rewardType == 2)
         {
-            UIManager.Instance.SetUndoButtonInteractable(false);
-            TraceManager.Instance.UndoPick();
+            TraceManager.Instance.UndoUntilCanWin();
         } else if(rewardType == 3)
         {
             GameManager.Instance.SetHeartFull();
@@ -132,29 +131,11 @@ public class AdManager : MonoBehaviour
 
     public void ShowRewardAdvertise()
     {
-        if (rewardType == 0)
+        if (MaxSdk.IsRewardedAdReady(adUnitId)){
+            MaxSdk.ShowRewardedAd(adUnitId);
+        }else
         {
-            UIManager.Instance.SetGoldButtonInteractable(false);
-            GameManager.Instance.GetHunderedEmoji();
-        }
-        else if (rewardType == 1)
-        {
-            UIManager.Instance.SetRetryButtonInteractable(false);
-            GameManager.Instance.RestartGame();
-        }
-        else if (rewardType == 2)
-        {
-            UIManager.Instance.SetUndoButtonInteractable(false);
-            TraceManager.Instance.UndoPick();
-        }
-        else if (rewardType == 3)
-        {
-            GameManager.Instance.SetHeartFull();
-        }
-        else if (rewardType == 4)
-        {
-            UIManager.Instance.SetHintButtonInteractable(false);
-            TraceManager.Instance.CheckCanSolve();
+            UIManager.Instance.ShowDialogueMessage("Advertise is not loaded!");
         }
     }
     public void SetRewardType(int type)

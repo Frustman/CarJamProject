@@ -18,7 +18,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private DialogueUI defeatPanel;
     [SerializeField] private DialogueUI winPanel;
     [SerializeField] private DialogueUI advertisePanel;
-    [SerializeField] private DialogueUI retryAdvertisePanel;
+    [SerializeField] private DialogueUI hintGoBackPanel;
+    [SerializeField] private DialogueUI goBackAdvertisePanel;
     [SerializeField] private DialogueUI restartAdvertisePanel;
     [SerializeField] private DialogueUI hintAdvertisePanel;
     [SerializeField] private GameObject ItemPanel;
@@ -30,12 +31,16 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelLabel;
     [SerializeField] private TextMeshProUGUI goldLabel;
     [SerializeField] private GameObject goldFrame;
+    [Space(5f)]
+    [SerializeField] private TextMeshProUGUI defeatGoldLabel;
+    [SerializeField] private TextMeshProUGUI defeatGasLabel;
 
     [Space(10f)]
     [SerializeField] private Button retryAdvertiseButton;
     [SerializeField] private Button hintAdvertiseButton;
     [SerializeField] private Button goldAdvertiseButton;
-    [SerializeField] private Button undoAdvertiseButton;
+    [Space(10f)]
+    [SerializeField] private Image hintButton;
 
 
 
@@ -57,17 +62,23 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.SetGameState(false);
         advertisePanel.SetActiveWithTween();
     }
-    public void ShowRetryAdvertisePanel()
+    public void ShowGoBackAdvertisePanel()
     {
         pickVehicle.SetCanPick(false);
         GameManager.Instance.SetGameState(false);
-        retryAdvertisePanel.SetActiveWithTween();
+        goBackAdvertisePanel.SetActiveWithTween();
     }
     public void ShowRestartAdvertisePanel()
     {
         pickVehicle.SetCanPick(false);
         GameManager.Instance.SetGameState(false);
         restartAdvertisePanel.SetActiveWithTween();
+    }
+    public void ShowHintGoBackPanel()
+    {
+        pickVehicle.SetCanPick(false);
+        GameManager.Instance.SetGameState(false);
+        hintGoBackPanel.SetActiveWithTween();
     }
 
     public void ShowAdvertise()
@@ -106,10 +117,6 @@ public class UIManager : MonoBehaviour
     {
         hintAdvertiseButton.interactable = state;
     }
-    public void SetUndoButtonInteractable(bool state)
-    {
-        undoAdvertiseButton.interactable = state;
-    }
     public void SetGoldButtonInteractable(bool state)
     {
         goldAdvertiseButton.interactable = state;
@@ -135,7 +142,9 @@ public class UIManager : MonoBehaviour
     public void RefreshUI()
     {
         goldLabel.text = GameManager.Instance.GetGoldAmount().ToString();
-        levelLabel.text = string.Format("Level {0}-{1}", GameManager.Instance.GetStageLevel(), GameManager.Instance.GetDifficulty() + 1);
+        levelLabel.text = string.Format("Level {0}", GameManager.Instance.GetStageLevel());
+        defeatGoldLabel.text = GameManager.Instance.GetGoldAmount().ToString();
+        if (HomeManager.Instance && !HomeManager.Instance.isInfiniteGas) defeatGasLabel.text = GameManager.Instance.GetHeart().ToString();
     }
 
     public void SetGameUIActive(bool active)
@@ -156,5 +165,17 @@ public class UIManager : MonoBehaviour
                 scaleTween = null;
             });
         });
+    }
+
+    public void RefreshHintUI()
+    {
+        int poppedVehicleCount = RoundManager.Instance.GetPoppedVehicleCount();
+        if (poppedVehicleCount <= 10)
+        {
+            hintButton.fillAmount = poppedVehicleCount / 10f;
+        } else
+        {
+            hintButton.fillAmount = 1;
+        }
     }
 }

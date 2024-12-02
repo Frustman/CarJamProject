@@ -65,6 +65,13 @@ public class HomeManager : MonoBehaviour
     {
         GameManager.Instance.ResetLevel();
     }
+
+    public void Get100Golds()
+    {
+        GameManager.Instance.IncreaseGold(100);
+        goldText.text = GameManager.Instance.GetGoldAmount().ToString();
+    }
+
     public void SetTheme(int index)
     {
         worldRotator.SetTheme(index);
@@ -244,7 +251,6 @@ public class HomeManager : MonoBehaviour
                 UIManager.Instance.SetHintButtonInteractable(true);
                 UIManager.Instance.SetRetryButtonInteractable(true);
                 UIManager.Instance.SetGoldButtonInteractable(true);
-                UIManager.Instance.SetUndoButtonInteractable(true);
 
                 heartText.text = GameManager.Instance.GetHeart().ToString();
                 DOVirtual.Vector3(initialHeartPosition, new Vector3(Screen.width / 2f, Screen.height / 2f, 0), 0.3f, value =>

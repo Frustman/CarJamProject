@@ -2,6 +2,7 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -33,8 +34,8 @@ public class GameManager : MonoBehaviour
 
     // Public
 
-    [HideInInspector] public bool isGameRunning = false;
-    [HideInInspector] public bool isInPause = false;
+    public bool isGameRunning = false;
+    public bool isInPause = false;
     [HideInInspector] public bool isRunningWinAnimation;
     [HideInInspector] public int stageGettingGoldAmount = 0;
     [HideInInspector] public int lastStageGettingGoldAmount = 0;
@@ -45,8 +46,6 @@ public class GameManager : MonoBehaviour
     private LevelData currentLevel;
 
     private int starCount = 3;
-
-
 
     private void Awake()
     {
@@ -234,13 +233,8 @@ public class GameManager : MonoBehaviour
     }
     public void GoToNextLevel()
     {
-        SaveManager.Instance.Save(string.Format("CarJam_{0}_{1}", currentLevel, difficulty), stageGettingGoldAmount);
-        if (difficulty == 0) difficulty = 1;
-        else
-        {
-            stageLevel++;
-            difficulty = 0;
-        }
+        SaveManager.Instance.Save(string.Format("CarJam_{0}", currentLevel), stageGettingGoldAmount);
+        stageLevel++;
         StartGame(stageLevel);
         starCount = 3;
     }
@@ -248,7 +242,7 @@ public class GameManager : MonoBehaviour
     public void LoadHome()
     {
         hardLevelAnimator.ResetDevilLevel();
-        SaveManager.Instance.Save(string.Format("CarJam_{0}_{1}", currentLevel, difficulty), stageGettingGoldAmount);
+        SaveManager.Instance.Save(string.Format("CarJam_{0}", currentLevel), stageGettingGoldAmount);
         difficulty = 0;
         HomeManager.Instance.Initialize();
         HomeManager.Instance.GoHome();
@@ -262,17 +256,18 @@ public class GameManager : MonoBehaviour
         {
             isRunningWinAnimation = true;
             InputManager.Instance.InvokeVibrate(2);
-            SaveManager.Instance.Save(string.Format("CarJam_{0}_{1}", currentLevel, difficulty), stageGettingGoldAmount);
+            SaveManager.Instance.Save(string.Format("CarJam_{0}", currentLevel), stageGettingGoldAmount);
             spawner.needToSpawnCustomer = false;
+            /*
             if (difficulty == 0)
             {
                 UIManager.Instance.CheckAnimation();
             }
             else
-            {
+            {*/
                 InvokeEmojiController(50, 300f, transform.position);
                 DOVirtual.DelayedCall(3f, WinPanelShow);
-            }
+            //}
         }
     }
 
@@ -286,7 +281,7 @@ public class GameManager : MonoBehaviour
         PoolManager.Instance.ResetObjects();
         UIManager.Instance.ShowWinPanel();
 
-        hardLevelAnimator.ResetDevilLevel();
+        //hardLevelAnimator.ResetDevilLevel();
 
         if (SaveManager.Instance.LoadInt("CarJam_Level") < stageLevel + 1)
         {
@@ -318,28 +313,26 @@ public class GameManager : MonoBehaviour
     {
         spawner.CancelTasks();
 
-        if (level * 2 + difficulty <= levelDatas.Count)
+        if (level < levelDatas.Count)
         {
-            currentLevel = levelDatas[(level - 1 ) * 2 + difficulty];
+            currentLevel = levelDatas[level];
         }
-        else currentLevel = randomLevelGenerator.GenerateLevelByDifficulty(level, difficulty);
+        else currentLevel = randomLevelGenerator.GenerateLevelByDifficulty(level, 1);
 
-
-
-        if (level == 1 && difficulty == 0) TutorialManager.Instance.StartTutorial();
-        if (currentLevel.difficulty == 1) hardLevelAnimator.EnterDevilLevel();
-        UIManager.Instance.RefreshUI();
+        //if (level == 1 && difficulty == 0) TutorialManager.Instance.StartTutorial();
+        //if (currentLevel.difficulty == 1) hardLevelAnimator.EnterDevilLevel();
         isGameRunning = true;
-        spawner.StartLevel(currentLevel);
         roundManager.StartLevel(currentLevel);
+        spawner.StartLevel(currentLevel);
         stageGettingGoldAmount = 0;
-        lastStageGettingGoldAmount = SaveManager.Instance.LoadInt(string.Format("CarJam_{0}_{1}", currentLevel, difficulty));
-
+        //lastStageGettingGoldAmount = SaveManager.Instance.LoadInt(string.Format("CarJam_{0}", currentLevel));
+        UIManager.Instance.RefreshUI();
+        UIManager.Instance.RefreshHintUI();
     }
 
     public void Defeat()
     {
-        SaveManager.Instance.Save(string.Format("CarJam_{0}_{1}", currentLevel, difficulty), stageGettingGoldAmount);
+        SaveManager.Instance.Save(string.Format("CarJam_{0}", currentLevel), stageGettingGoldAmount);
         isGameRunning = false;
         UIManager.Instance.ShowDefeatPanel();
     }
@@ -349,16 +342,24 @@ public class GameManager : MonoBehaviour
     {
         if (canCheckWin)
         {
-            if (gold >= 30)
+            //if(RoundManager.Instance.GetPoppedVehicleCount() >= 10)
+            if(true)
             {
-                canCheckWin = false;
-                DecreaseGold(30);
-                SaveManager.Instance.Save("CarJam_Gold", gold);
-                TraceManager.Instance.CheckCanSolve();
+                if (gold >= 30)
+                {
+                    canCheckWin = false;
+                    DecreaseGold(30);
+                    SaveManager.Instance.Save("CarJam_Gold", gold);
+                    TraceManager.Instance.CheckCanSolve();
+                }
+                else
+                {
+                    UIManager.Instance.ShowHintAdvertisePanel();
+                }
             }
             else
             {
-                UIManager.Instance.ShowHintAdvertisePanel();
+                UIManager.Instance.ShowDialogueMessage("You must pop at least 10 vehicles!");
             }
         }
     }
@@ -375,17 +376,33 @@ public class GameManager : MonoBehaviour
         HomeManager.Instance.Initialize();
     }
 
-    public void RestartUsingGold()
+    public void GobackUsingGold()
     {
         if (gold >= 200)
         {
             DecreaseGold(200);
             SaveManager.Instance.Save("CarJam_Gold", gold);
-            RestartGame();
+            TraceManager.Instance.UndoUntilCanWin();
         }
         else
         {
-            UIManager.Instance.ShowRetryAdvertisePanel();
+            UIManager.Instance.ShowGoBackAdvertisePanel();
+        }
+    }
+
+    public void RetryUsingGas()
+    {
+        if(HomeManager.Instance.isInfiniteGas || heart > 0)
+        {
+            if (!HomeManager.Instance.isInfiniteGas)
+            {
+                DecreaseHeart();
+            }
+            SaveManager.Instance.Save("CarJam_Heart", heart);
+            RestartGame();
+        } else
+        {
+            UIManager.Instance.ShowRestartAdvertisePanel();
         }
     }
 
@@ -405,19 +422,12 @@ public class GameManager : MonoBehaviour
 
     public void Undo10TimesUsingGold()
     {
-        if(gold >= 10)
-        {
-            DecreaseGold(10);
-            TraceManager.Instance.UndoPick();
-        } else
-        {
-            UIManager.Instance.ShowRetryAdvertisePanel();
-        }
+        TraceManager.Instance.UndoPick();
     }
 
     public void RestartGame()
     {
-        SaveManager.Instance.Save(string.Format("CarJam_{0}_{1}", currentLevel, difficulty), stageGettingGoldAmount);
+        SaveManager.Instance.Save(string.Format("CarJam_{0}", currentLevel), stageGettingGoldAmount);
         PoolManager.Instance.ResetObjects();
         StartGame(stageLevel);
         UIManager.Instance.RefreshUI();

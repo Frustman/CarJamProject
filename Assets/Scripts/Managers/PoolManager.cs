@@ -107,6 +107,7 @@ public class PoolManager : MonoBehaviour
             {
                 Put(i, obj);
             }
+            enabledObjectsPools[i].Clear();
         }
     }
 }

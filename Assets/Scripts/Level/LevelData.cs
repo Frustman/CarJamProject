@@ -26,6 +26,7 @@ public class LevelData : ScriptableObject
     public int[] customerColorLine;
 
     public int totalGridCount;
+    public int fullSpaceCount;
 
     public float directionFlipRate;
 
@@ -35,6 +36,7 @@ public class LevelData : ScriptableObject
     public Vector2Int gridSize;
     public int[][] vehicleGrid;
 
+    public int[] answer;
     public int[] pickAnswer;
 
     public string themaSceneName;

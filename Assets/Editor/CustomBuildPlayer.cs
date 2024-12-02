@@ -10,6 +10,7 @@ public class CustomBuildPlayer : MonoBehaviour
     [MenuItem("Build/Build Android")]
     public static void BuildAndroid()
     {
+
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = new[] { "Assets/Scenes/MainScene.unity", "Assets/Scenes/HomeScene.unity", "Assets/Scenes/Thema_City.unity" };
         buildPlayerOptions.locationPathName = "BUILD/KYH_CarJam.apk";
@@ -33,6 +34,7 @@ public class CustomBuildPlayer : MonoBehaviour
     [MenuItem("Build/Build IOS")]
     public static void BuildIOS()
     {
+
         BuildPlayerOptions buildPlayerOptions = new BuildPlayerOptions();
         buildPlayerOptions.scenes = new[] { "Assets/Scenes/MainScene.unity", "Assets/Scenes/HomeScene.unity", "Assets/Scenes/Thema_City.unity" };
         buildPlayerOptions.locationPathName = "BUILD/ZDEV_KYH_iOS/";

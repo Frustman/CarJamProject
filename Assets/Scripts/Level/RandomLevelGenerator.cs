@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -48,14 +50,21 @@ public class RandomLevelGenerator : MonoBehaviour
         string path = "Assets/Resources/Levels";
         for(int i = 1; i < 200; i++)
         {
-            for(int j = 0; j < 2; j++)
-            {
-                LevelData data = GenerateLevelByDifficulty(i, j);
-                AssetDatabase.CreateAsset(data, string.Format("{0}/{1}-{2}.asset", path, i, j+1));
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-            }
+            LevelData data = GenerateLevelByDifficulty(i, 1);
+            AssetDatabase.CreateAsset(data, string.Format("{0}/{1}.asset", path, i));
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
+    }
+    [ContextMenu("Generate Level 100")]
+    public void GenerateLevel100()
+    {
+        string path = "Assets/Resources/Levels";
+        int i = 100;
+        LevelData data = GenerateLevelByDifficulty(i, 1);
+        AssetDatabase.CreateAsset(data, string.Format("{0}/{1}.asset", path, i));
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 #endif
 
@@ -90,6 +99,8 @@ public class RandomLevelGenerator : MonoBehaviour
             }
             colorCount = 4 + (int)(levelIndex / 1.5f);
         }
+
+        availableSpaceCount = Min(availableSpaceCount, 4);
 
 
         directionFlipRate = 0.4f + (levelIndex) * 0.05f;
@@ -154,11 +165,11 @@ public class RandomLevelGenerator : MonoBehaviour
     public LevelData GenerateLevel(int level, int difficulty)
     {
         LevelData levelData = ScriptableObject.CreateInstance<LevelData>();
-        levelData.name = string.Format("{0}-{1}", level, difficulty + 1);
+        levelData.name = string.Format("{0}", level);
         levelData.difficulty = difficulty;
         levelData.colorCount = colorCount;
         levelData.availableVehicleSpace = availableSpaceCount;
-        levelData.level = difficulty;
+        levelData.level = level;
         levelData.leastParkableSpace = leastParkableSpace;
 
         levelData.vehicle2x2Count = new int[colorCount];
@@ -254,9 +265,9 @@ public class RandomLevelGenerator : MonoBehaviour
         int[] answer = new int[vehicleDataList.Count];
         for (int i = 0; i < popOrder.Count; i++)
         {
-            answer[i] = vehicleDataList.IndexOf(popOrder[i]);
+            answer[i] = popOrder[i].posInGrid.x * 25 + popOrder[i].posInGrid.y;
         }
-        level.pickAnswer = answer;
+        level.answer = answer;
 
         return GenerateCustomerLineFromPopOrder(popOrder, level);
     }
@@ -267,6 +278,7 @@ public class RandomLevelGenerator : MonoBehaviour
         int[] customerLine = new int[level.totalCustomerCount];
         int customerLineIdx = 0;
         int[] customerLineIndexFromPopOrder = new int[popOrder.Count];
+
         for (int i = 0; i < popOrder.Count; i++)
         {
             customerLineIndexFromPopOrder[i] = Vehicle.GetCustomerCountByIndex(popOrder[i].vehicleIndex);
@@ -299,9 +311,30 @@ public class RandomLevelGenerator : MonoBehaviour
             customerLineIdx = 0;
             int shuffleVehicleCount, maxShuffleIdx, vehicleIdx = 0;
             int changeIdx1, changeIdx2, tempValue;
+
+            int blockSpaceCount = (int)(200f / (-30f - level.level) + 15f);
+            int currentVehicleCount = 0;
+            List<int> shuffleCount = new List<int>();
+            float blockSpaceRate = (float)(blockSpaceCount * leastParkableSpace) / (float)level.totalVehicleCount;
+            for (int i = 0; currentVehicleCount < level.totalVehicleCount; i++)
+            {
+                int addCount;
+                if(random.NextDouble() < blockSpaceRate)
+                {
+                    addCount= level.leastParkableSpace;
+                } else
+                {
+                    addCount = random.Next(2, level.leastParkableSpace);
+                }
+                shuffleCount.Add(addCount);
+                currentVehicleCount += addCount;
+            }
+
+            level.fullSpaceCount = 0;
+            int idx = 0;
             while (vehicleIdx < customerLineIndexFromPopOrder.Length)
             {
-                shuffleVehicleCount = random.Next(2, level.leastParkableSpace + 1);
+                shuffleVehicleCount = shuffleCount[idx];
                 if (vehicleIdx + shuffleVehicleCount >= customerLineIndexFromPopOrder.Length) break;
                 maxShuffleIdx = customerLineIdx;
                 for (int i = 0; i < shuffleVehicleCount; i++)
@@ -315,7 +348,7 @@ public class RandomLevelGenerator : MonoBehaviour
                         changeIdx1 = random.Next(customerLineIdx, maxShuffleIdx);
                         changeIdx2 = random.Next(customerLineIdx, maxShuffleIdx);
                         if (changeIdx1 == changeIdx2) continue;
-
+                        
                         tempValue = customerLine[changeIdx1];
                         customerLine[changeIdx1] = customerLine[changeIdx2];
                         customerLine[changeIdx2] = tempValue;
@@ -323,6 +356,9 @@ public class RandomLevelGenerator : MonoBehaviour
                 }
                 customerLineIdx = maxShuffleIdx;
                 vehicleIdx += shuffleVehicleCount;
+                if (shuffleVehicleCount == level.leastParkableSpace)
+                    level.fullSpaceCount++;
+                idx++;
             }
         }
 

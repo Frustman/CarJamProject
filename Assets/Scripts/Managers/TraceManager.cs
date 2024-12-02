@@ -1,8 +1,11 @@
+using DG.Tweening;
 using Solver;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public class Pick
@@ -42,6 +45,7 @@ public class TraceManager : MonoBehaviour
     [SerializeField] private CustomerSpawner spawner;
     [SerializeField] private VehicleSpace vehicleSpace;
     [SerializeField] private RoundManager roundManager;
+    [SerializeField] private LevelSolverMultiThread levelSolverMulti;
     [SerializeField] private LevelSolver levelSolver;
     [SerializeField] private HintPanelUI hintPanelUI;
 
@@ -64,6 +68,9 @@ public class TraceManager : MonoBehaviour
     [SerializeField] private int[] ridingCustomers;
 
     private int colorCount;
+    private float canUndoTimer = 0f;
+
+    public bool useMult = false;
 
 
     public int solveIndex;
@@ -99,11 +106,12 @@ public class TraceManager : MonoBehaviour
 
     public void RemoveAnswer()
     {
-        levelSolver.RemoveAnswer();
+        if (useMult) levelSolverMulti.RemoveAnswer();
+        else levelSolver.RemoveAnswer();
     }
 
 
-    public void Initialize(int[] customerLine, int availableSpaceCount, int colorCount, Vector2Int gridCenter)
+    public void Initialize(int[] customerLine, int availableSpaceCount, int colorCount, Vector2Int gridCenter, int[] answer)
     {
         canUndo = true;
         solveIndex = 0;
@@ -131,7 +139,14 @@ public class TraceManager : MonoBehaviour
             ridingCustomers[i] = 0;
         }
         currentCustomerIndex = 0;
-        levelSolver.Initialize(customerLine, availableSpaceCount);
+        if (useMult)
+        {
+            levelSolverMulti.InitializeCysharp(customerLine, availableSpaceCount, answer, colorCount);
+        } else
+        {
+            levelSolver.InitializeCysharp(customerLine, availableSpaceCount, answer, colorCount);
+        }
+        //levelSolver.Initialize(customerLine, availableSpaceCount, answer, colorCount);
     }
 
     CancellationTokenSource solveToken = new();
@@ -142,12 +157,26 @@ public class TraceManager : MonoBehaviour
 
     public async void CheckCanSolve(Vehicle vehicle)
     {
-        if (await levelSolver.StartSolve(solveIndex, vehicle))
+        if (useMult)
         {
-            failPanel.SetActive(false);
+            if (await levelSolverMulti.StartSolve(solveIndex, vehicle))
+            {
+                //failPanel.SetActive(false);
+            }
+            else
+            {
+                //failPanel.SetActive(true);
+            }
         } else
         {
-            failPanel.SetActive(true);
+            if (await levelSolver.StartSolve(solveIndex, vehicle))
+            {
+                //failPanel.SetActive(false);
+            }
+            else
+            {
+                //failPanel.SetActive(true);
+            }
         }
     }
     
@@ -155,15 +184,71 @@ public class TraceManager : MonoBehaviour
     {
         pickVehicle.SetCanPick(false);
         hintPanelUI.gameObject.SetActive(true);
-        if (await levelSolver.StartSolve(solveIndex))
+        if (useMult)
         {
-            hintPanelUI.SetYes();
-        } else
+            if (await levelSolverMulti.StartSolve(solveIndex))
+            {
+                hintPanelUI.SetYes();
+            }
+            else
+            {
+                hintPanelUI.SetNo();
+            }
+        }
+        else
         {
-            hintPanelUI.SetNo();
+            if (await levelSolver.StartSolve(solveIndex))
+            {
+                hintPanelUI.SetYes();
+            }
+            else
+            {
+                hintPanelUI.SetNo();
+            }
         }
         pickVehicle.SetCanPick(true);
     }
+
+
+    public async void UndoUntilCanWin()
+    {
+        pickVehicle.SetCanPick(false);
+        hintPanelUI.gameObject.SetActive(true);
+        if (useMult)
+        {
+            while (true)
+            {
+                if (await levelSolverMulti.StartSolve(solveIndex))
+                {
+                    hintPanelUI.SetYes();
+                    break;
+                }
+                else
+                {
+                    Undo();
+                    continue;
+                }
+            }
+        }
+        else
+        {
+            while (true)
+            {
+                if (await levelSolver.StartSolve(solveIndex))
+                {
+                    hintPanelUI.SetYes();
+                    break;
+                }
+                else
+                {
+                    Undo();
+                    continue;
+                }
+            }
+        }
+        pickVehicle.SetCanPick(true);
+    }
+
 
 
     public void PushPick(Vehicle vehicle, int parkIdx)
@@ -240,29 +325,37 @@ public class TraceManager : MonoBehaviour
     {
         if(GameManager.Instance.GetGoldAmount() >= 30)
         {
-            if (canUndo)
+            Undo(() =>
             {
-                if (picks.TryPop(out lastPick))
-                {
-                    GameManager.Instance.DecreaseGold(30);
-
-                    roundManager.UndoVehiclePick(lastPick.pickedVehicle);
-                    vehicleSpace.SetParkedVehicles(lastPick.ridingCustomers, lastPick.parkedVehicles);
-                    spawner.ChangeCustomerIndex(lastPick.customerIndex);
-
-                    parkedVehicleIndex = lastPick.parkedVehicleIndex;
-                    availableSeatCount = lastPick.availableSeatCount;
-                    ridingCustomers = lastPick.ridingCustomers;
-                    parkedVehicles = lastPick.parkedVehicles;
-                }
-                else
-                {
-                    UIManager.Instance.ShowDialogueMessage("There's no selection to undo!");
-                }
-            }
+                GameManager.Instance.DecreaseGold(30);
+            });
         } else
         {
             UIManager.Instance.ShowAdvertisePanel();
+        }
+    }
+
+    public void Undo(TweenCallback callback = null)
+    {
+        if (canUndo)
+        {
+            if (picks.TryPop(out lastPick))
+            {
+                if (callback != null) callback();
+                UIManager.Instance.RefreshHintUI();
+                roundManager.UndoVehiclePick(lastPick.pickedVehicle);
+                vehicleSpace.SetParkedVehicles(lastPick.ridingCustomers, lastPick.parkedVehicles);
+                spawner.ChangeCustomerIndex(lastPick.customerIndex);
+
+                parkedVehicleIndex = lastPick.parkedVehicleIndex;
+                availableSeatCount = lastPick.availableSeatCount;
+                ridingCustomers = lastPick.ridingCustomers;
+                parkedVehicles = lastPick.parkedVehicles;
+            }
+            else
+            {
+                UIManager.Instance.ShowDialogueMessage("There's no selection to undo!");
+            }
         }
     }
 
@@ -294,10 +387,20 @@ public class TraceManager : MonoBehaviour
         }
     }
 
-
-
-    public bool IsBeatableInCurrentSituation()
+    public void SetUndoImpossible()
     {
-        return true;
+        canUndo = false;
+        canUndoTimer = 0;
+    }
+
+    public void Update()
+    {
+        canUndoTimer += Time.deltaTime;
+
+        if (canUndoTimer > 1f)
+        {
+            canUndoTimer = 0;
+            canUndo = true;
+        }
     }
 }

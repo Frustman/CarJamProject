@@ -68,7 +68,7 @@ public class CustomerSpawner : MonoBehaviour
 
         spawnCustomerTask = SpawnCustomer(spawnCustomerToken.Token);
         spawnCustomerTask.Forget();
-        traceManager.Initialize(customerLine, level.availableVehicleSpace, level.colorCount, level.gridSize / 2);
+        traceManager.Initialize(customerLine, level.availableVehicleSpace, level.colorCount, level.gridSize / 2, level.answer);
     }
     private void OnApplicationQuit()
     {
@@ -246,7 +246,6 @@ public class CustomerSpawner : MonoBehaviour
 
     public async UniTask CheckIfCanPopCustomer(int[] availableSeats, bool canDefeat, CancellationToken token)
     {
-        TraceManager.Instance.canUndo = false;
         FrameRateManager.Instance.SetRenderingFullFps(true);
         int[] available = new int[availableSeats.Length];
         int[] seatDiff = new int[availableSeats.Length];
@@ -261,8 +260,10 @@ public class CustomerSpawner : MonoBehaviour
         while (waitingCustomers.Count > 0 && available[(int)waitingCustomers[0].GetPersonColor()] > 0 || available[levelData.colorCount] > 0)
         {
             if (token.IsCancellationRequested) return;
+            TraceManager.Instance.SetUndoImpossible();
             while (GameManager.Instance.isInPause)
             {
+                TraceManager.Instance.SetUndoImpossible();
                 if (token.IsCancellationRequested) return;
                 await UniTask.Yield();
             }
@@ -309,7 +310,6 @@ public class CustomerSpawner : MonoBehaviour
         {
             GameManager.Instance.Win();
         }
-        TraceManager.Instance.canUndo = true;
         if (canDefeat) vehicleSpace.CheckIfDefeat();
     }
 }
